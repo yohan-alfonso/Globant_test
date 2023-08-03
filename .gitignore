@@ -9,7 +9,12 @@
 /test/tmp/
 /test/version_tmp/
 /tmp/
-
+/generated/
+/Scripts/
+/share/
+/include/
+/Lib/
+test-pipelines/Lib/site-packages/~ip/_vendor/chardet/__pycache__/*pyc
 # Used by dotenv library to load environment variables.
 # .env
 
