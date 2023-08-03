@@ -1,4 +1,11 @@
+"""
+Creado por : Yohan Alfonso Hernandez
+Fecha:03-08-2023
+Tema: ingesta de datos en base de datos con SQLalchemy y Fastapi
+"""
+
 from fastapi import FastAPI, Depends, HTTPException
+from package import tablas_e_inserta_data_historica
 from package import schemas
 
 # Rest of the code remains the same
@@ -17,10 +24,28 @@ def  get_root(): # hacer una peticion de get para retorno de información
     
 # @app.post("/package/")
 # def post_employees(request: schemas.Empresa):
-#     return "Nuevo empleado" + str(request.employees.name) + " " + request.employees.id + " " \
-#         + str(request.employees.datetime) + " " + request.employees.department_id + " " + request.employees.job_id
+#     return "Nuevo empleado" + str(request.employees.name) + " " + str(request.employees.id) + " " \
+#         + str(request.employees.datetime) + " " + str(request.employees.department_id) + " " + str(request.employees.job_id)
 
 @app.post("/package/")
 def post_employees(request: schemas.Empresa):
-    return "Nuevo empleado: " + request.employees.name + " " + str(request.employees.id) + " " \
-        + request.employees.datetime + " " + str(request.employees.department_id) + " " + str(request.employees.job_id)
+    tablas_e_inserta_data_historica.add_employees(
+        convert_into_employee_db_model(request.employees),
+        convert_into_department_db_model(request.departments),
+        convert_into_job_db_model(request.jobs)
+    )
+    return "Nuevo empleado" + str(request.employees.name) + " " + str(request.employees.id) + " " \
+         + str(request.employees.datetime) + " " + str(request.employees.department_id) + " " + str(request.employees.job_id)
+
+   
+def convert_into_employee_db_model(employees: schemas.Employees):
+    return tablas_e_inserta_data_historica.Employees(id=employees.id,name=employees.name, datetime= employees.datetime,department_id=employees.department_id,job_id=employees.job_id)
+
+
+def convert_into_department_db_model(departments: schemas.Departments):
+    return tablas_e_inserta_data_historica.Departments(id=departments.id,department=departments.department)
+
+def convert_into_job_db_model(jobs: schemas.Jobs):
+    return tablas_e_inserta_data_historica.Jobs(id= jobs.id, job=jobs.job)
+
+

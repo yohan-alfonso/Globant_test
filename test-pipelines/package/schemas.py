@@ -1,3 +1,9 @@
+"""
+Creado por : Yohan Alfonso Hernandez
+Fecha:03-08-2023
+Tema: Creación de schemas para ingesta de datos en base de datos con SQLalchemy y Fastapi
+"""
+
 from pydantic import BaseModel
 
 class Employees(BaseModel):

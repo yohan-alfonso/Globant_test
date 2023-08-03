@@ -1,3 +1,9 @@
+"""
+Creado por : Yohan Alfonso Hernandez
+Fecha:03-08-2023
+Tema: Creación de tablas e ingesta de datos en base de datos con SQLalchemy y Fastapi
+"""
+
 #pre reqisitos:
 
 #-Run
@@ -10,7 +16,7 @@
 
 import csv
 from sqlalchemy import create_engine, select
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, select
 from sqlalchemy.orm import registry, relationship, Session
 
 # Define the database credentials
@@ -26,7 +32,7 @@ engine = create_engine(f'mysql://{user}:{password}@{host}:{port}/{database}')
 mapper_registry = registry()
 Base = mapper_registry.generate_base()
 
-class employees(Base):
+class Employees(Base):
     __tablename__ = 'employees'
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
@@ -34,30 +40,30 @@ class employees(Base):
     department_id = Column(Integer, ForeignKey('departments.id'))  # ForeignKey reference
     job_id = Column(Integer, ForeignKey('jobs.id'))  # ForeignKey reference
     
-    department = relationship("departments", back_populates="employees")  # Define the relationship
-    job = relationship("jobs", back_populates="employees")  # Define the relationship
+    department = relationship("Departments", back_populates="employees")  # Define the relationship
+    job = relationship("Jobs", back_populates="employees")  # Define the relationship
     
     def __repr__(self):
         return "<employees(id='{0}', name='{1}', datetime='{2}', department_id='{3}', job_id='{4}')>".format(
             self.id, self.name, self.datetime, self.department_id, self.job_id
         )
 
-class departments(Base):
+class Departments(Base):
     __tablename__ = 'departments'
     id = Column(Integer, primary_key=True)
     department = Column(String(50))
     
-    employees = relationship("employees", back_populates="department")  # Define the relationship
+    employees = relationship("Employees", back_populates="department")  # Define the relationship
         
     def __repr__(self):
         return "<departments(id='{0}', department='{1}')>".format(self.id, self.department)
 
-class jobs(Base):
+class Jobs(Base):
     __tablename__ = 'jobs'
     id = Column(Integer, primary_key=True)
     job = Column(String(50))
 
-    employees = relationship("employees", back_populates="job")  # Define the relationship
+    employees = relationship("Employees", back_populates="job")  # Define the relationship
 
     def __repr__(self):
         return "<jobs (id='{0}', job='{1}')>".format(self.id, self.job)   
@@ -69,6 +75,52 @@ Base = mapper_registry.generate_base()
 
 Base.metadata.create_all(engine)
 
+# Insert new values to the database
+# this code cheks if already exist data than can be intented to ingest
+def add_employees (employees:Employees, departments:Departments, jobs:Jobs):
+
+    
+    with Session(engine) as session:
+        existing_employees= session.execute(select(Employees).filter(Employees.id==employees.id,Employees.name==employees.name, Employees.id==employees.id)).scalar()
+        print(existing_employees)       
+        if existing_employees is not None:
+            print("emplooyee exist! Not adding employee")    
+            return
+        
+        print("employee does not exist. Adding employee")
+        session.add(employees)
+        
+        existing_departments = session.execute(select(Departments).filter(Departments.id==departments.id,Departments.department==departments.department)).scalar()
+        if existing_departments is not None:
+            print("Department departmnet exist!, not added")
+            session.flush()
+      
+        else:
+            print(" Department. department doesn't exist, add department")
+            session.add(department)
+            session.flush()
+            session.add(Departments)
+        
+        existing_job = session.execute(select(Jobs).filter(Jobs.id==jobs.id,Jobs.job==jobs.job)).scalar()
+        if existing_departments is not None:
+            print("Jobs departmnet exist!, not added")
+            session.flush()
+
+        else:
+            print(" Department. department doesn't exist, add department")
+            session.add(jobs)
+            session.flush()
+            session.add(Jobs)
+        session.commit()
+
+            
+            
+
+
+
+#insert historical data to the database
+
+"""
 # Function to insert data from employees.csv
 # Function to insert data from employees.csv
 def insert_employees_from_csv(file_path):
@@ -124,8 +176,6 @@ def insert_jobs_from_csv(file_path):
 insert_departments_from_csv('./data/departments.csv')
 insert_jobs_from_csv('./data/jobs.csv')
 insert_employees_from_csv('./data/hired_employees.csv')
-
-
-
+"""
 
 
